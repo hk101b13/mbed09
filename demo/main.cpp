@@ -9,8 +9,10 @@ RpcDigitalOut myled1(LED1,"myled1");
 RpcDigitalOut myled2(LED2,"myled2");
 RpcDigitalOut myled3(LED3,"myled3");
 BufferedSerial pc(USBTX, USBRX);
-void LEDControl(Arguments *in, Reply *out);
-RPCFunction rpcLED(&LEDControl, "LEDControl");
+void LEDControl_1(Arguments *in, Reply *out);
+void LEDControl_2(Arguments *in, Reply *out);
+RPCFunction rpcLED1(&LEDControl_1, "LEDControl1");
+RPCFunction rpcLED2(&LEDControl_2, "LEDControl2");
 double x, y;
 
 int main() {
@@ -39,7 +41,30 @@ int main() {
 }
 
 // Make sure the method takes in Arguments and Reply objects.
-void LEDControl (Arguments *in, Reply *out)   {
+void LEDControl_1 (Arguments *in, Reply *out)   {
+    bool success = true;
+
+    // In this scenario, when using RPC delimit the two arguments with a space.
+    x = in->getArg<double>();
+    y = in->getArg<double>();
+
+    // Have code here to call another RPC function to wake up specific led or close it.
+    char buffer[200], outbuf[256];
+    char strings[20];
+    int led = x;
+    int on = y;
+    sprintf(strings, "/myled%d/write %d", led, on);
+    strcpy(buffer, strings);
+    RPC::call(buffer, outbuf);
+    if (success) {
+        out->putData(buffer);
+    } else {
+        out->putData("Failed to execute LED control.");
+    }
+}
+
+// Make sure the method takes in Arguments and Reply objects.
+void LEDControl_2 (Arguments *in, Reply *out)   {
     bool success = true;
 
     // In this scenario, when using RPC delimit the two arguments with a space.
